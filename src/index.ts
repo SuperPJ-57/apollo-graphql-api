@@ -1,41 +1,38 @@
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
-import express from 'express';
 import { typeDefs } from './graphql/schema/index.js';
 import { resolvers } from './graphql/resolvers/index.js';
-import './config/env.js';
+import { ExpressContextFunctionArgument } from '@apollo/server/express4';
+import { MyContext } from './types/context.js';
+
+
+// 👇 Pass context type to ApolloServer
+const server = new ApolloServer<MyContext>({
+  typeDefs,
+  resolvers,
+});
+
+await server.start();
 
 const app = express();
 
-// Create Apollo Server instance
-const server = new ApolloServer({ typeDefs, resolvers });
+app.use(
+  '/graphql',
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  }),
+  express.json(),
+  expressMiddleware(server, {
+    context: async ({ req, res }: ExpressContextFunctionArgument): Promise<MyContext> => {
+      return { req, res };
+    },
+  })
+);
 
-// CORS configuration
-const corsOptions = {
-  origin: 'http://localhost:3000',
-  credentials: true // if you need to allow credentials
-};
-
-// Start the server and apply middleware
-async function startServer() {
-  await server.start();
-  
-  // Apply middleware with CORS configuration
-  app.use(
-    '/graphql',
-    cors(corsOptions),  // Apply CORS with specific origin
-    express.json(),
-    expressMiddleware(server, {
-      context: async ({ req }) => ({ token: req.headers.token }),
-    })
-  );
-  
-  // Start Express server
-  app.listen(4000, () => {
-    console.log(`Server ready at http://localhost:4000/graphql`);
-    console.log(`CORS configured for http://localhost:3000`);
-  });
-}
-
-startServer();
+const PORT = 4000;
+app.listen(PORT, () => {
+  console.log(`Server ready at http://localhost:${PORT}/graphql`);
+});
