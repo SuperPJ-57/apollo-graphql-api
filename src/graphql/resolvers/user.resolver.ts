@@ -76,7 +76,7 @@ export const userResolvers = {
         throw new Error("Invalid credentials");
       }
 
-      const tokens = generateTokens({ id: user.id, email: user.email });
+      const tokens = generateTokens({ id: user.id, email: user.email,firstname: user.firstname, lastname: user.lastname });
       const refreshTokenHash = hashToken(tokens.refreshToken);
 
       await db.query(
@@ -181,7 +181,7 @@ export const userResolvers = {
       };
     },
   },
-  Query:{
+  Query: {
     me: async (_: unknown, __: unknown, context: MyContext): Promise<User> => {
       const { user } = context;
 

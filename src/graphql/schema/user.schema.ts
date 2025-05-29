@@ -29,6 +29,7 @@ export const userTypeDefs = `#graphql
   }
 
   type Query {
+    me: User
     _empty: String
   }
 

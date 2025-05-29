@@ -6,6 +6,7 @@ import { typeDefs } from './graphql/schema/index.js';
 import { resolvers } from './graphql/resolvers/index.js';
 import { ExpressContextFunctionArgument } from '@apollo/server/express4';
 import { MyContext } from './types/context.js';
+import { getUserFromRequest } from './middleware/authMiddleware.js';
 
 
 // 👇 Pass context type to ApolloServer
@@ -27,7 +28,9 @@ app.use(
   express.json(),
   expressMiddleware(server, {
     context: async ({ req, res }: ExpressContextFunctionArgument): Promise<MyContext> => {
-      return { req, res };
+      const user = getUserFromRequest(req);
+      console.log('User from request:', user);
+      return { req, res, user };
     },
   })
 );

@@ -7,7 +7,7 @@ const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET!;
 export function generateTokens(payload: object) {
   const jti = randomUUID(); // Unique ID for the refresh token
 
-  const accessToken = jwt.sign(payload, ACCESS_SECRET, { expiresIn: '15m' });
+  const accessToken = jwt.sign(payload, ACCESS_SECRET, { expiresIn: '5s' });
   const refreshToken = jwt.sign({ ...payload, jti }, REFRESH_SECRET, { expiresIn: '7d' });
 
   return { accessToken, refreshToken, jti };
